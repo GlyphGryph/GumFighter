@@ -47,7 +47,13 @@ NSTC.SelectionScreen.prototype = {
       }
     }
     if(this.playerJoined && this.game.keyManager.isReleased("enter")){
-      this.state.start('GameScreen', true, false, this.columns);
+      var joinedPlayers = [];
+      for(var ii=0;ii<this.columns.length;ii+=1){
+        if(this.columns[ii].joined){
+          joinedPlayers.push(this.columns[ii]);
+        }
+      }
+      this.state.start('GameScreen', true, false, {colunns: this.columns.length, players: joinedPlayers});
     }
   }
 }
