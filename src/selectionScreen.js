@@ -24,6 +24,15 @@ NSTC.SelectionScreen.prototype = {
       )
       column.joinText.x = column.left+column.width/2-column.joinText.width/2;
     }
+
+    this.playerJoined = false;
+  },
+  join: function(){
+    if(!this.playerJoined){
+      this.playerJoined = true;
+      this.directionsText = this.game.add.text(0,20,"Press 'Enter' to begin game now!", { fill: "#000", fontSize: 16 })
+      this.directionsText.x = this.game.width/2 - this.directionsText.width/2
+    }
   },
   update: function(){
     this.game.keyManager.update();
@@ -34,7 +43,11 @@ NSTC.SelectionScreen.prototype = {
         column.state = "characterSelect";
         column.joinText.text = "Welcome, "+column.name+"!";
         column.joinText.x = column.left+column.width/2-column.joinText.width/2;
+        this.join();
       }
+    }
+    if(this.playerJoined && this.game.keyManager.isReleased("enter")){
+      this.state.start('GameScreen', true, false, this.columns);
     }
   }
 }

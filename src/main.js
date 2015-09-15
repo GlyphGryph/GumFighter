@@ -5,5 +5,6 @@ window.onload = function(){
   game.state.add('Preloader', NSTC.Preloader);
   game.state.add('IntroScreen', NSTC.IntroScreen);
   game.state.add('SelectionScreen', NSTC.SelectionScreen);
+  game.state.add('GameScreen', NSTC.GameScreen);
   game.state.start('Boot');
 }
