@@ -13,7 +13,7 @@ NSTC.IntroScreen.prototype = {
   update: function(){
     this.game.keyManager.update();
     if(this.game.keyManager.isReleased('enter')){
-      this.state.start('SelectionScreen', true, false, this.getSelectedOption().songData);
+      this.state.start('SelectionScreen', true, false);
     }
   }
 }

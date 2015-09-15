@@ -1,0 +1,18 @@
+NSTC.StartMenu = function(game){};
+NSTC.StartMenu.prototype = {
+  create: function(){
+    this.columns = [
+      {color:"#99F"},
+      {color:"#9F9"},
+      {color:"#FF9"},
+      {color:"#9FF"}
+    ]
+
+    
+    this.idleGraphic = new Phaser.Graphics().beginFill(0x0000FF).drawCircle(0,0,50,50);
+    this.game.add.Sprite(0, 0, this.idleGraphic.generateTexture());
+  },
+  update: function(){
+    this.game.keyManager.update();
+  }
+}
