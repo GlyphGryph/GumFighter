@@ -11,7 +11,6 @@ NSTC.SelectionScreen.prototype = {
     var column, background;
     for(var ii=0;ii<this.columns.length;ii+=1){
       column = this.columns[ii];
-      column.state = "open";
       column.width = this.game.width/this.columns.length
       column.height = this.game.height;
       column.left = column.width * ii;
@@ -23,11 +22,13 @@ NSTC.SelectionScreen.prototype = {
         { fill: '#000', fontSize: 12 }
       )
       column.joinText.x = column.left+column.width/2-column.joinText.width/2;
+      column.joined = false;
     }
 
     this.playerJoined = false;
   },
-  join: function(){
+  join: function(column){
+    column.joined = true;
     if(!this.playerJoined){
       this.playerJoined = true;
       this.directionsText = this.game.add.text(0,20,"Press 'Enter' to begin game now!", { fill: "#000", fontSize: 16 })
@@ -39,11 +40,10 @@ NSTC.SelectionScreen.prototype = {
     var column;
     for(var ii=0;ii<this.columns.length;ii+=1){
       column = this.columns[ii];
-      if(column.state == "open" && this.game.keyManager.isReleased(column.joinKey)){
-        column.state = "characterSelect";
+      if(!column.joined && this.game.keyManager.isReleased(column.joinKey)){
         column.joinText.text = "Welcome, "+column.name+"!";
         column.joinText.x = column.left+column.width/2-column.joinText.width/2;
-        this.join();
+        this.join(column);
       }
     }
     if(this.playerJoined && this.game.keyManager.isReleased("enter")){
