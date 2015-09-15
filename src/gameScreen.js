@@ -2,7 +2,6 @@ NSTC.GameScreen = function(game){};
 NSTC.GameScreen.prototype = {
   init: function(joinData){
     this.playerData = joinData;
-    console.log(joinData);
   },
   create: function(){
     this.background = {}
@@ -25,9 +24,17 @@ NSTC.GameScreen.prototype = {
         player.optimalChewMax = 80;
         player.bubbleSize = 0;
         player.bubbleHealth = 100;
+
+        player.directionText = this.game.add.text(
+          0, this.game.height/2+10,
+          "Alternate '"+player.leftKey+"' and '"+player.rightKey+"' to chew!",
+          { fill: '#000', fontSize: 12 }
+        )
+        player.directionText.x = player.left+player.width/2-player.directionText.width/2;
+
         
         player.statText = this.game.add.text(
-          0, this.game.height/2+20,
+          0, this.game.height/2+100,
           "Chew Value: "+player.chewValue+"\n   Target: "+player.optimalChewMin+"-"+player.optimalChewMax+"\n"+
           "Bubble Size: "+player.bubbleSize+"\nBubble Health: "+player.bubbleHealth,
           { fill: '#000', fontSize: 12 }

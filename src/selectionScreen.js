@@ -2,10 +2,10 @@ NSTC.SelectionScreen = function(game){};
 NSTC.SelectionScreen.prototype = {
   create: function(){
     this.columns = [
-      {color:0x9999FF, joinKey: "a", name: "Fred"},
-      {color:0x99FF99, joinKey: "s", name: "Tony"},
-      {color:0xFFFF99, joinKey: "w", name: "Joe"},
-      {color:0x99FFFF, joinKey: "d", name: "Albert"}
+      {color:0x9999FF, selectKey: "q", leftKey: "w", rightKey: "s", name: "Fred"},
+      {color:0x99FF99, selectKey: "c", leftKey: "v", rightKey: "b", name: "Tony"},
+      {color:0xFFFF99, selectKey: "l", leftKey: "n", rightKey: "m", name: "Joe"},
+      {color:0x99FFFF, selectKey: "numpad 6", leftKey: "numpad 1", rightKey: "numpad 2", name: "Albert"}
     ]
     
     var column, background;
@@ -18,7 +18,7 @@ NSTC.SelectionScreen.prototype = {
       column.background = this.game.add.sprite(column.left, 0, background.generateTexture());
       column.joinText = this.game.add.text(
         0, this.game.height/2,
-        "Press '"+column.joinKey+"' to join",
+        "Press '"+column.selectKey+"' to join",
         { fill: '#000', fontSize: 12 }
       )
       column.joinText.x = column.left+column.width/2-column.joinText.width/2;
@@ -40,7 +40,7 @@ NSTC.SelectionScreen.prototype = {
     var column;
     for(var ii=0;ii<this.columns.length;ii+=1){
       column = this.columns[ii];
-      if(!column.joined && this.game.keyManager.isReleased(column.joinKey)){
+      if(!column.joined && this.game.keyManager.isReleased(column.selectKey)){
         column.joinText.text = "Welcome, "+column.name+"!";
         column.joinText.x = column.left+column.width/2-column.joinText.width/2;
         this.join(column);
