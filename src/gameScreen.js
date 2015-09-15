@@ -19,7 +19,20 @@ NSTC.GameScreen.prototype = {
         player.character = this.game.add.sprite(0, 0, graphic.generateTexture());
         player.character.y = this.game.height/2 - player.character.height;
         player.character.x = player.left+player.width/2-player.character.width/2;
+
+        player.chewValue = 0;
+        player.optimalChewMin = 60;
+        player.optimalChewMax = 80;
+        player.bubbleSize = 0;
+        player.bubbleHealth = 100;
         
+        player.statText = this.game.add.text(
+          0, this.game.height/2+20,
+          "Chew Value: "+player.chewValue+"\n   Target: "+player.optimalChewMin+"-"+player.optimalChewMax+"\n"+
+          "Bubble Size: "+player.bubbleSize+"\nBubble Health: "+player.bubbleHealth,
+          { fill: '#000', fontSize: 12 }
+        )
+        player.statText.x = player.left+player.width/2-player.statText.width/2;
       }
     }
   },
