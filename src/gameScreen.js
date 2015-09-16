@@ -22,6 +22,7 @@ NSTC.GameScreen.prototype = {
       blowDirection: function(player){ return "Hold '"+player.selectKey+"' to breathe in,\npress '"+player.leftKey+"' and '"+player.rightKey+"' to steady!" },
       blowStart: "Blow! Blow! Blow!"
     }
+    this.breathMeterWidth = 160;
 
     var player;
     for(var ii=0;ii<this.players.length;ii+=1){
@@ -47,21 +48,20 @@ NSTC.GameScreen.prototype = {
       player.state = "chewing";
 
       player.directionText = this.game.add.text(
-        0, this.game.height/2+10,
+        0, this.game.height/2+50,
         this.messages.chewDirection(player),
         { fill: '#000', fontSize: 12, align: 'center' }
       )
       player.directionText.x = player.left+player.width/2-player.directionText.width/2;
 
       player.progressText = this.game.add.text(
-        0, this.game.height/2+60,
+        0, this.game.height/2+100,
         this.messages.chewStart,
         { fill: '#000', fontSize: 12, align: 'center' }
       )
       player.progressText.x = player.left+player.width/2-player.progressText.width/2;
-
       
-      player.statText = this.game.add.text(0, this.game.height/2+100,"",{ fill: '#000', fontSize: 12 })
+      player.statText = this.game.add.text(0, this.game.height/2+150,"",{ fill: '#000', fontSize: 12 })
       this.updateStatText(player);
       this.floatText(player, "GO!");
     }
@@ -128,6 +128,29 @@ NSTC.GameScreen.prototype = {
       player.directionText.x = player.left+player.width/2-player.directionText.width/2;
       player.progressText.text = this.messages.blowStart;
       player.progressText.x = player.left+player.width/2-player.progressText.width/2;
+      
+      player.breathMeter = this.game.add.sprite(0,this.game.height/2+10);
+      player.breathMeter.x = player.left + (player.width/2 - this.breathMeterWidth/2);
+
+      player.breathMeterBackground = this.game.add.graphics(0,0);
+      player.breathMeter.addChild(player.breathMeterBackground);
+      player.breathMeterBackground.moveTo(-3,0);
+      player.breathMeterBackground.lineStyle(16,0x000000,1);
+      player.breathMeterBackground.lineTo(this.breathMeterWidth+3,0);
+      player.breathMeterBackground.moveTo(0,0);
+      player.breathMeterBackground.lineStyle(10,0xFF0000,1);
+      player.breathMeterBackground.lineTo(this.breathMeterWidth/3,0);
+      player.breathMeterBackground.lineStyle(10,0x00FF00,1);
+      player.breathMeterBackground.lineTo(this.breathMeterWidth/3*2,0);
+      player.breathMeterBackground.lineStyle(10,0xFF0000,1);
+      player.breathMeterBackground.lineTo(this.breathMeterWidth,0);
+
+      player.breathMeterNeedle = this.game.add.graphics(0,-10);
+      player.breathMeter.addChild(player.breathMeterNeedle);
+      player.breathMeterNeedle.lineStyle(4,0xFFFF00,1);
+      player.breathMeterNeedle.lineTo(0,20);
+
+
       player.state = "blowing";
     }
     if(player.state == "blowing"){
@@ -145,6 +168,9 @@ NSTC.GameScreen.prototype = {
         player.balance = -player.balanceMax;
         player.balanceSpeed = 0;
       }
+      var meterHalf = this.breathMeterWidth/2;
+      var needlePosition = player.balance / player.balanceMax * meterHalf;
+      player.breathMeterNeedle.x = meterHalf + needlePosition;
     }
     this.updateStatText(player);
   },
