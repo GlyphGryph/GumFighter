@@ -35,8 +35,15 @@ NSTC.GameScreen.prototype = {
       player.chewSpeed = 0;
       player.optimalChewMin = 84000;
       player.optimalChewMax = 88000;
+      player.chewMax = 100000;
+      player.balanceMax = 6000;
+      player.balanceEdge = 2000;
+      player.balance = 0;
+      player.balanceSpeed = 0;
+      player.breathMax = 5000;
+      player.breath = player.breathMax;
       player.bubbleSize = 0;
-      player.bubbleHealth = 100;
+      player.bubbleHealth = 10000;
       player.state = "chewing";
 
       player.directionText = this.game.add.text(
@@ -60,11 +67,18 @@ NSTC.GameScreen.prototype = {
     }
   },
   updateStatText(player){
-    player.statText.text = "Chew Value: "+player.chewValue+"\n";
-    player.statText.text += "    Speed: "+player.chewSpeed+"\n";
-    player.statText.text += "    Target: "+player.optimalChewMin+"-"+player.optimalChewMax+"\n";
-    player.statText.text += "Bubble Size: "+player.bubbleSize+"\n";
-    player.statText.text += "Bubble Health: "+player.bubbleHealth;
+    player.statText.text = "";
+    if(player.state == "chewing"){
+      player.statText.text += "Chew Value: "+player.chewValue+"\n";
+      player.statText.text += "    Speed: "+player.chewSpeed+"\n";
+      player.statText.text += "    Target: "+player.optimalChewMin+"-"+player.optimalChewMax+"\n";
+    } else if(player.state == "blowing"){
+      player.statText.text += "Tenderness: "+player.tenderness+"%\n";
+      player.statText.text += "Breath: "+player.breath+" / "+player.breathMax+"\n";
+      player.statText.text += "Balance: "+player.balance+"\n";
+      player.statText.text += "Bubble Size: "+player.bubbleSize+"\n";
+      player.statText.text += "Bubble Health: "+player.bubbleHealth;
+    }
     player.statText.x = player.left+player.width/2-player.statText.width/2;
   },
   updateState: function(player){
@@ -73,6 +87,7 @@ NSTC.GameScreen.prototype = {
         player.chewSpeed+=10;
       }
       player.chewValue += player.chewSpeed;
+      if(player.chewValue > player.chewMax){ player.chewValue = player.chewMax; }
       player.chewSpeed -= 1;
       if(player.chewSpeed <= 0){ player.chewSpeed = 0; }
 
@@ -101,8 +116,12 @@ NSTC.GameScreen.prototype = {
     } 
     if(player.state == "doneChewing"){
       if(player.chewValue > player.optimalChewMax){
+        var pastMax = player.chewValue - player.optimalChewMax;
+        var pastZone = player.chewMax - player.optimalChewMax;
+        player.tenderness = Match.floor(100 - 100*(pastMax/pastZone));
         this.floatText(player, "YEUGH!");
       }else{
+        player.tenderness = 100;
         this.floatText(player, "TENDER!");
       }
       player.directionText.text = this.messages.blowDirection(player);
@@ -112,7 +131,20 @@ NSTC.GameScreen.prototype = {
       player.state = "blowing";
     }
     if(player.state == "blowing"){
-      "!";
+      if(this.game.keyManager.isHeld(player.rightKey)){
+        player.balanceSpeed += 1;
+      }
+      if(this.game.keyManager.isHeld(player.leftKey)){
+        player.balanceSpeed -= 1;
+      }
+      player.balance += player.balanceSpeed;
+      if(player.balance > player.balanceMax){
+        player.balance = player.balanceMax;
+        player.balanceSpeed = 0;
+      }else if(player.balance < -player.balanceMax){
+        player.balance = -player.balanceMax;
+        player.balanceSpeed = 0;
+      }
     }
     this.updateStatText(player);
   },
@@ -133,9 +165,9 @@ NSTC.GameScreen.prototype = {
     for(var ii=0;ii<this.players.length;ii+=1){
       player = this.players[ii];
       this.updateState(player);
-    }
-    if(this.game.keyManager.isReleased('enter')){
-      player.state = "doneChewing";
+      if(this.game.keyManager.isReleased('enter')){
+        player.state = "doneChewing";
+      }
     }
   }
 }
