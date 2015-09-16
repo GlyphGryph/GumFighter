@@ -76,6 +76,7 @@ NSTC.GameScreen.prototype = {
       player.statText.text += "Tenderness: "+player.tenderness+"%\n";
       player.statText.text += "Breath: "+player.breath+" / "+player.breathMax+"\n";
       player.statText.text += "Balance: "+player.balance+"\n";
+      player.statText.text += "Balance Speed: "+player.balanceSpeed+"\n";
       player.statText.text += "Bubble Size: "+player.bubbleSize+"\n";
       player.statText.text += "Bubble Health: "+player.bubbleHealth;
     }
@@ -160,6 +161,11 @@ NSTC.GameScreen.prototype = {
       if(this.game.keyManager.isHeld(player.leftKey)){
         player.balanceSpeed -= 1;
       }
+      
+      if(this.game.rnd.integerInRange(0, 100) <= 1){
+        player.balanceSpeed += this.game.rnd.pick([-30,30]);
+      }
+
       player.balance += player.balanceSpeed;
       if(player.balance > player.balanceMax){
         player.balance = player.balanceMax;
