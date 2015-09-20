@@ -23,6 +23,7 @@ NSTC.GameScreen.prototype = {
       blowStart: "Blow! Blow! Blow!"
     }
     this.breathMeterWidth = 160;
+    this.chewMeterWidth = 160;
 
     var player;
     for(var ii=0;ii<this.players.length;ii+=1){
@@ -48,20 +49,20 @@ NSTC.GameScreen.prototype = {
       player.state = "chewing";
 
       player.directionText = this.game.add.text(
-        0, this.game.height/2+50,
-        this.messages.chewDirection(player),
+        0, this.game.height/2+50, "",
         { fill: '#000', fontSize: 12, align: 'center' }
       )
       player.directionText.x = player.left+player.width/2-player.directionText.width/2;
 
       player.progressText = this.game.add.text(
-        0, this.game.height/2+100,
-        this.messages.chewStart,
+        0, this.game.height/2+100, "",
         { fill: '#000', fontSize: 12, align: 'center' }
       )
       player.progressText.x = player.left+player.width/2-player.progressText.width/2;
       
       player.statText = this.game.add.text(0, this.game.height/2+150,"",{ fill: '#000', fontSize: 12 })
+
+      this.setupChewing(player);
       this.updateStatText(player);
       this.floatText(player, "GO!");
     }
@@ -72,6 +73,7 @@ NSTC.GameScreen.prototype = {
       player.statText.text += "Chew Value: "+player.chewValue+"\n";
       player.statText.text += "    Speed: "+player.chewSpeed+"\n";
       player.statText.text += "    Target: "+player.optimalChewMin+"-"+player.optimalChewMax+"\n";
+      player.statText.text += "    Portion: "+player.chewValue / player.chewMax+"\n";
     } else if(player.state == "blowing"){
       player.statText.text += "Tenderness: "+player.tenderness+"%\n";
       player.statText.text += "Breath: "+player.breath+" / "+player.breathMax+"\n";
@@ -81,6 +83,62 @@ NSTC.GameScreen.prototype = {
       player.statText.text += "Bubble Health: "+player.bubbleHealth;
     }
     player.statText.x = player.left+player.width/2-player.statText.width/2;
+  },
+  setupChewing: function(player){
+    player.directionText.text = this.messages.chewDirection(player);
+    player.directionText.x = player.left+player.width/2-player.directionText.width/2;
+    player.progressText.text = this.messages.chewStart;
+    player.progressText.x = player.left+player.width/2-player.progressText.width/2;
+    
+    player.chewMeter = this.game.add.sprite(0,this.game.height/2+10);
+    player.chewMeter.x = player.left + (player.width/2 - this.chewMeterWidth/2);
+
+    player.chewMeterBackground = this.game.add.graphics(0,0);
+    player.chewMeter.addChild(player.chewMeterBackground);
+    player.chewMeterBackground.moveTo(-3,0);
+    player.chewMeterBackground.lineStyle(16,0x000000,1);
+    player.chewMeterBackground.lineTo(this.chewMeterWidth+3,0);
+    player.chewMeterBackground.moveTo(0,0);
+    player.chewMeterBackground.lineStyle(10,0x0000FF,1);
+    var portion = player.optimalChewMin / player.chewMax;
+    player.chewMeterBackground.lineTo(this.chewMeterWidth * portion,0);
+    player.chewMeterBackground.lineStyle(10,0x00FF00,1);
+    portion = player.optimalChewMax / player.chewMax;
+    player.chewMeterBackground.lineTo(this.chewMeterWidth * portion,0);
+    player.chewMeterBackground.lineStyle(10,0xFF0000,1);
+    player.chewMeterBackground.lineTo(this.chewMeterWidth,0);
+
+    player.chewMeterNeedle = this.game.add.graphics(0,-10);
+    player.chewMeter.addChild(player.chewMeterNeedle);
+    player.chewMeterNeedle.lineStyle(4,0xFFFF00,1);
+    player.chewMeterNeedle.lineTo(0,20);
+  },
+  setupBlowing: function(player){
+    player.directionText.text = this.messages.blowDirection(player);
+    player.directionText.x = player.left+player.width/2-player.directionText.width/2;
+    player.progressText.text = this.messages.blowStart;
+    player.progressText.x = player.left+player.width/2-player.progressText.width/2;
+    
+    player.breathMeter = this.game.add.sprite(0,this.game.height/2+10);
+    player.breathMeter.x = player.left + (player.width/2 - this.breathMeterWidth/2);
+
+    player.breathMeterBackground = this.game.add.graphics(0,0);
+    player.breathMeter.addChild(player.breathMeterBackground);
+    player.breathMeterBackground.moveTo(-3,0);
+    player.breathMeterBackground.lineStyle(16,0x000000,1);
+    player.breathMeterBackground.lineTo(this.breathMeterWidth+3,0);
+    player.breathMeterBackground.moveTo(0,0);
+    player.breathMeterBackground.lineStyle(10,0xFF0000,1);
+    player.breathMeterBackground.lineTo(this.breathMeterWidth/3,0);
+    player.breathMeterBackground.lineStyle(10,0x00FF00,1);
+    player.breathMeterBackground.lineTo(this.breathMeterWidth/3*2,0);
+    player.breathMeterBackground.lineStyle(10,0xFF0000,1);
+    player.breathMeterBackground.lineTo(this.breathMeterWidth,0);
+
+    player.breathMeterNeedle = this.game.add.graphics(0,-10);
+    player.breathMeter.addChild(player.breathMeterNeedle);
+    player.breathMeterNeedle.lineStyle(4,0xFFFF00,1);
+    player.breathMeterNeedle.lineTo(0,20);
   },
   updateState: function(player){
     if(player.state == "chewing"){
@@ -110,6 +168,9 @@ NSTC.GameScreen.prototype = {
         player.progressText.text = this.messages.chewStart;
       }
       player.progressText.x = player.left+player.width/2-player.progressText.width/2;
+      
+      var portion = player.chewValue / player.chewMax;
+      player.chewMeterNeedle.x = this.chewMeterWidth * portion;
 
       if(player.chewValue > player.optimalChewMin && player.chewSpeed == 0){
         player.state = "doneChewing";
@@ -119,39 +180,13 @@ NSTC.GameScreen.prototype = {
       if(player.chewValue > player.optimalChewMax){
         var pastMax = player.chewValue - player.optimalChewMax;
         var pastZone = player.chewMax - player.optimalChewMax;
-        player.tenderness = Match.floor(100 - 100*(pastMax/pastZone));
+        player.tenderness = Math.floor(100 - 100*(pastMax/pastZone));
         this.floatText(player, "YEUGH!");
       }else{
         player.tenderness = 100;
         this.floatText(player, "TENDER!");
       }
-      player.directionText.text = this.messages.blowDirection(player);
-      player.directionText.x = player.left+player.width/2-player.directionText.width/2;
-      player.progressText.text = this.messages.blowStart;
-      player.progressText.x = player.left+player.width/2-player.progressText.width/2;
-      
-      player.breathMeter = this.game.add.sprite(0,this.game.height/2+10);
-      player.breathMeter.x = player.left + (player.width/2 - this.breathMeterWidth/2);
-
-      player.breathMeterBackground = this.game.add.graphics(0,0);
-      player.breathMeter.addChild(player.breathMeterBackground);
-      player.breathMeterBackground.moveTo(-3,0);
-      player.breathMeterBackground.lineStyle(16,0x000000,1);
-      player.breathMeterBackground.lineTo(this.breathMeterWidth+3,0);
-      player.breathMeterBackground.moveTo(0,0);
-      player.breathMeterBackground.lineStyle(10,0xFF0000,1);
-      player.breathMeterBackground.lineTo(this.breathMeterWidth/3,0);
-      player.breathMeterBackground.lineStyle(10,0x00FF00,1);
-      player.breathMeterBackground.lineTo(this.breathMeterWidth/3*2,0);
-      player.breathMeterBackground.lineStyle(10,0xFF0000,1);
-      player.breathMeterBackground.lineTo(this.breathMeterWidth,0);
-
-      player.breathMeterNeedle = this.game.add.graphics(0,-10);
-      player.breathMeter.addChild(player.breathMeterNeedle);
-      player.breathMeterNeedle.lineStyle(4,0xFFFF00,1);
-      player.breathMeterNeedle.lineTo(0,20);
-
-
+      this.setupBlowing(player);
       player.state = "blowing";
     }
     if(player.state == "blowing"){
