@@ -22,7 +22,7 @@ NSTC.GameScreen.prototype = {
       blowDirection: function(player){ return "Hold '"+player.selectKey+"' to breathe in,\npress '"+player.leftKey+"' and '"+player.rightKey+"' to steady!" },
       blowStart: "Blow! Blow! Blow!"
     }
-    this.breathMeterWidth = 160;
+    this.blowMeterWidth = 160;
     this.chewMeterWidth = 160;
 
     var player;
@@ -66,6 +66,8 @@ NSTC.GameScreen.prototype = {
       this.updateStatText(player);
       this.floatText(player, "GO!");
     }
+
+    this.game.time.events.start();
   },
   updateStatText(player){
     player.statText.text = "";
@@ -119,26 +121,28 @@ NSTC.GameScreen.prototype = {
     player.progressText.text = this.messages.blowStart;
     player.progressText.x = player.left+player.width/2-player.progressText.width/2;
     
-    player.breathMeter = this.game.add.sprite(0,this.game.height/2+10);
-    player.breathMeter.x = player.left + (player.width/2 - this.breathMeterWidth/2);
+    player.blowMeter = this.game.add.sprite(0,this.game.height/2+10);
+    player.blowMeter.x = player.left + (player.width/2 - this.blowMeterWidth/2);
 
-    player.breathMeterBackground = this.game.add.graphics(0,0);
-    player.breathMeter.addChild(player.breathMeterBackground);
-    player.breathMeterBackground.moveTo(-3,0);
-    player.breathMeterBackground.lineStyle(16,0x000000,1);
-    player.breathMeterBackground.lineTo(this.breathMeterWidth+3,0);
-    player.breathMeterBackground.moveTo(0,0);
-    player.breathMeterBackground.lineStyle(10,0xFF0000,1);
-    player.breathMeterBackground.lineTo(this.breathMeterWidth/3,0);
-    player.breathMeterBackground.lineStyle(10,0x00FF00,1);
-    player.breathMeterBackground.lineTo(this.breathMeterWidth/3*2,0);
-    player.breathMeterBackground.lineStyle(10,0xFF0000,1);
-    player.breathMeterBackground.lineTo(this.breathMeterWidth,0);
+    player.blowMeterBackground = this.game.add.graphics(0,0);
+    player.blowMeter.addChild(player.blowMeterBackground);
+    player.blowMeterBackground.moveTo(-3,0);
+    player.blowMeterBackground.lineStyle(16,0x000000,1);
+    player.blowMeterBackground.lineTo(this.blowMeterWidth+3,0);
+    player.blowMeterBackground.moveTo(0,0);
+    player.blowMeterBackground.lineStyle(10,0xFF0000,1);
+    player.blowMeterBackground.lineTo(this.blowMeterWidth/3,0);
+    player.blowMeterBackground.lineStyle(10,0x00FF00,1);
+    player.blowMeterBackground.lineTo(this.blowMeterWidth/3*2,0);
+    player.blowMeterBackground.lineStyle(10,0xFF0000,1);
+    player.blowMeterBackground.lineTo(this.blowMeterWidth,0);
 
-    player.breathMeterNeedle = this.game.add.graphics(0,-10);
-    player.breathMeter.addChild(player.breathMeterNeedle);
-    player.breathMeterNeedle.lineStyle(4,0xFFFF00,1);
-    player.breathMeterNeedle.lineTo(0,20);
+    player.blowMeterNeedle = this.game.add.graphics(0,-10);
+    player.blowMeter.addChild(player.blowMeterNeedle);
+    player.blowMeterNeedle.lineStyle(4,0xFFFF00,1);
+    player.blowMeterNeedle.lineTo(0,20);
+
+    player.blowEvent = this.game.time.events.loop(player.breath/2, this.destabilize, this, player);
   },
   updateState: function(player){
     if(player.state == "chewing"){
@@ -196,10 +200,6 @@ NSTC.GameScreen.prototype = {
       if(this.game.keyManager.isHeld(player.leftKey)){
         player.balanceSpeed -= 1;
       }
-      
-      if(this.game.rnd.integerInRange(0, 100) <= 1){
-        player.balanceSpeed += this.game.rnd.pick([-30,30]);
-      }
 
       player.balance += player.balanceSpeed;
       if(player.balance > player.balanceMax){
@@ -209,11 +209,14 @@ NSTC.GameScreen.prototype = {
         player.balance = -player.balanceMax;
         player.balanceSpeed = 0;
       }
-      var meterHalf = this.breathMeterWidth/2;
+      var meterHalf = this.blowMeterWidth/2;
       var needlePosition = player.balance / player.balanceMax * meterHalf;
-      player.breathMeterNeedle.x = meterHalf + needlePosition;
+      player.blowMeterNeedle.x = meterHalf + needlePosition;
     }
     this.updateStatText(player);
+  },
+  destabilize: function(player){
+    player.balanceSpeed += this.game.rnd.pick([-30,30]);
   },
   floatText: function(player, words){
     var text = this.game.add.text(
