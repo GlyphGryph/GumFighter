@@ -46,7 +46,7 @@ NSTC.GameScreen.prototype = {
       player.breath = player.breathMax;
       player.bubbleSize = 0;
       player.bubbleHealth = 100;
-      player.state = "start";
+      player.state = "ready";
 
       player.directionText = this.game.add.text(
         0, this.game.height/2+50, "",
@@ -117,6 +117,7 @@ NSTC.GameScreen.prototype = {
     player.chewMeterNeedle.lineTo(0,20);
   },
   teardownChewing: function(player){
+    player.state = "ready";
     player.chewMeter.destroy();
     player.chewMeterBackground.destroy();
     player.chewMeterNeedle.destroy();
@@ -154,9 +155,12 @@ NSTC.GameScreen.prototype = {
     player.blowEvent = this.game.time.events.loop(player.breath/2, this.destabilize, this, player);
   },
   teardownBlowing: function(player){
+    player.state = "ready";
     player.blowMeter.destroy();
     player.blowMeterBackground.destroy();
     player.blowMeterNeedle.destroy();
+    this.game.time.events.remove(player.blowEvent);
+    player.blowEvent = null;
     player.balance = 0;
     player.balanceSpeed = 0;
     player.breath = player.breathMax;
@@ -243,6 +247,11 @@ NSTC.GameScreen.prototype = {
       if(player.bubbleHealth < 0){
         this.pop(player);
       }
+
+      player.bubbleSize += 1;
+      if(player.bubbleSize > 2000){
+        this.win(player);
+      }
     }
     this.updateStatText(player);
   },
@@ -252,6 +261,14 @@ NSTC.GameScreen.prototype = {
   pop: function(player){
     this.teardownBlowing(player);
     this.setupChewing(player);
+  },
+  win: function(player){
+    this.teardownBlowing(player);
+    this.floatText(player, "VICTORY!");
+    player.directionText.text = "VICTORY!";
+    player.directionText.x = player.left+player.width/2-player.directionText.width/2;
+    player.progressText.text = "VICTORY!";
+    player.progressText.x = player.left+player.width/2-player.progressText.width/2;
   },
   floatText: function(player, words){
     var text = this.game.add.text(
